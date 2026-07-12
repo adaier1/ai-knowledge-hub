@@ -1,0 +1,298 @@
+﻿/* ====================================
+   AI Knowledge Hub — Apple Design v2
+   ==================================== */
+
+:root {
+  --apple-blue: #0071e3;
+  --apple-blue-hover: #0077ed;
+  --apple-green: #34c759;
+  --apple-orange: #ff9f0a;
+  --apple-red: #ff3b30;
+  --apple-text-primary: #1d1d1f;
+  --apple-text-secondary: #6e6e73;
+  --apple-text-tertiary: #86868b;
+  --apple-bg: #f5f5f7;
+  --apple-card: #ffffff;
+  --apple-border: #e8e8ed;
+  --apple-sidebar-bg: #ffffff;
+  --apple-sidebar-active: #f5f5f7;
+  --apple-shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --apple-shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
+  --apple-shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--apple-bg);
+  color: var(--apple-text-primary);
+  line-height: 1.47059;
+  letter-spacing: -0.022em;
+}
+
+#app { height: 100vh; width: 100vw; }
+
+/* ---- Layout ---- */
+.app-layout { height: 100vh; display: flex; }
+
+/* ---- Sidebar ---- */
+.app-sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--apple-sidebar-bg);
+  border-right: 1px solid var(--apple-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, min-width 0.25s ease;
+  overflow: hidden;
+  z-index: 10;
+}
+.app-sidebar.collapsed { width: 64px; min-width: 64px; }
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--apple-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar-logo .logo-icon { flex-shrink: 0; display: block; }
+.sidebar-logo .logo-text { opacity: 1; transition: opacity 0.2s; }
+.collapsed .sidebar-logo .logo-text { opacity: 0; }
+
+.sidebar-nav { flex: 1; padding: 4px 8px; display: flex; flex-direction: column; gap: 1px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--apple-text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+  user-select: none;
+}
+.nav-item:hover { background: var(--apple-sidebar-active); color: var(--apple-text-primary); }
+.nav-item.active { background: var(--apple-blue); color: white; }
+.nav-item .nav-icon { flex-shrink: 0; }
+.nav-item .nav-label { opacity: 1; transition: opacity 0.12s; margin-left: 4px; }
+.collapsed .nav-item .nav-label { opacity: 0; width: 0; overflow: hidden; margin: 0; }
+.collapsed .nav-item { justify-content: center; padding: 8px; }
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border-top: 1px solid var(--apple-border);
+  color: var(--apple-text-tertiary);
+  cursor: pointer;
+  transition: color 0.15s;
+  font-size: 10px;
+}
+.sidebar-toggle:hover { color: var(--apple-text-primary); }
+
+/* ---- Main Content ---- */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app-header {
+  height: 52px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--apple-border);
+  z-index: 5;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--apple-text-primary);
+}
+
+.app-content {
+  flex: 1;
+  padding: 24px 28px 40px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Apple Card ---- */
+.apple-card {
+  background: var(--apple-card);
+  border-radius: 10px;
+  box-shadow: var(--apple-shadow-sm);
+  border: 1px solid var(--apple-border);
+  padding: 20px 22px;
+  transition: box-shadow 0.2s ease;
+}
+.apple-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+
+/* ---- Stat Cards ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--apple-card);
+  border-radius: 10px;
+  box-shadow: var(--apple-shadow-sm);
+  border: 1px solid var(--apple-border);
+  padding: 16px 18px;
+  transition: box-shadow 0.2s ease, transform 0.12s ease;
+  cursor: default;
+}
+.stat-card:hover {
+  box-shadow: var(--apple-shadow-md);
+  transform: translateY(-1px);
+}
+.stat-card .stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--apple-text-tertiary);
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.stat-card .stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+/* ---- Buttons ---- */
+.apple-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: var(--apple-blue);
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.apple-btn-primary:hover { background: var(--apple-blue-hover); }
+.apple-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.apple-btn-primary:active { transform: scale(0.97); }
+
+button, .apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 32px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  background: var(--apple-blue);
+  color: white;
+  white-space: nowrap;
+  user-select: none;
+}
+button:hover { background: var(--apple-blue-hover); }
+button:disabled { opacity: 0.5; cursor: default; }
+.apple-btn-outline {
+  background: transparent;
+  border: 1px solid var(--apple-border);
+  color: var(--apple-text-primary);
+}
+.apple-btn-outline:hover { background: var(--apple-sidebar-active); border-color: #c7c7cc; }
+
+/* ---- Inputs ---- */
+.apple-input {
+  width: 100%;
+  padding: 6px 12px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--apple-border);
+  font-size: 13px;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: var(--apple-text-primary);
+  background: var(--apple-card);
+  outline: none;
+  transition: border-color 0.12s;
+}
+.apple-input:focus { border-color: var(--apple-blue); box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+.apple-input:read-only { background: var(--apple-bg); }
+
+select.apple-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+
+/* ---- Tags ---- */
+.apple-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  background: var(--apple-sidebar-active);
+  color: var(--apple-text-secondary);
+}
+
+/* ---- Shared utility ---- */
+.font-mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+/* ---- Simple fade transition ---- */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* ---- Naive UI overrides ---- */
+.n-layout { height: 100vh !important; }
+.n-layout-sider { background: var(--apple-sidebar-bg) !important; }
+.n-layout-content { background: transparent !important; }
+.n-card { border-radius: 10px !important; }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d1d6; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #aeaeb2; }

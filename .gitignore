@@ -1,0 +1,52 @@
+﻿# Dependencies
+node_modules/
+frontend/node_modules/
+backend/venv/
+backend/__pycache__/
+*.pyc
+__pycache__/
+
+# Build output
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.env.local
+
+# Data
+backend/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+
+# Debug / temp scripts
+check_*.py
+fix_*.py
+debug_*.py
+dump_*.py
+temp_*.py
+*.cjs
+
+# Deploy package
+deploy_package/
+
+# Root debug scripts
+check.py
+check_chars.py
+check_garbled.py
+debug_gbk.py
+find_user.py

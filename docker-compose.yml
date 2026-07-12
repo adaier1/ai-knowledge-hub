@@ -1,0 +1,27 @@
+﻿version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: akh-backend
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    expose:
+      - "8000"
+    environment:
+      - APP_NAME=AI Knowledge Hub
+      - DEBUG=false
+      - CORS_ORIGINS=["*"]
+
+  frontend:
+    image: nginx:alpine
+    container_name: akh-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
