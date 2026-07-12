@@ -2,7 +2,7 @@
 # AI Knowledge Hub - Deploy Script
 set -e
 
-SERVER="root@192.168.31.150"
+SERVER="root@YOUR_SERVER_IP"
 REMOTE_DIR="/opt/ai-knowledge-hub"
 KEY_FILE="$HOME/.ssh/ai-knowledge-studio-key"
 
@@ -22,4 +22,4 @@ sleep 3
 ssh -i "$KEY_FILE" "$SERVER" "cd $REMOTE_DIR && docker compose ps"
 
 echo "=== Deployment complete ==="
-echo "Access: http://192.168.31.150"
+echo "Access: http://YOUR_SERVER_IP"

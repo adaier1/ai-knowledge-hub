@@ -2,7 +2,7 @@
 
 > 版本: v1.0  
 > 最后更新: 2026-07-08  
-> 在线访问: http://192.168.31.150
+> 在线访问: http://YOUR_SERVER_IP
 
 ---
 
@@ -47,8 +47,8 @@ npm install --legacy-peer-deps
 npm run build
 
 # 部署到服务器
-scp -r dist/* root@192.168.31.150:/var/www/html/
-ssh root@192.168.31.150 "chmod -R 755 /var/www/html/assets"
+scp -r dist/* root@YOUR_SERVER_IP:/var/www/html/
+ssh root@YOUR_SERVER_IP "chmod -R 755 /var/www/html/assets"
 \`\`\`
 
 ---

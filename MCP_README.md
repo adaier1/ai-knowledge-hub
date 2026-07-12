@@ -16,7 +16,7 @@ Get your API key from the **MCP Service** page in the web UI.
 ### 3. Quick Test
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | \
-  python mcp_stdio_client.py --url http://192.168.31.150 --key YOUR_KEY
+  python mcp_stdio_client.py --url http://YOUR_SERVER_IP --key YOUR_KEY
 ```
 
 ### 4. Claude Desktop
@@ -29,7 +29,7 @@ Edit `claude_desktop_config.json`:
       "command": "python",
       "args": [
         "/path/to/mcp_stdio_client.py",
-        "--url", "http://192.168.31.150",
+        "--url", "http://YOUR_SERVER_IP",
         "--key", "YOUR_API_KEY"
       ]
     }
@@ -43,7 +43,7 @@ Settings → MCP → Add Server:
 ```
 Name: ai-knowledge-hub
 Type: command
-Command: python /path/to/mcp_stdio_client.py --url http://192.168.31.150 --key YOUR_KEY
+Command: python /path/to/mcp_stdio_client.py --url http://YOUR_SERVER_IP --key YOUR_KEY
 ```
 
 ## Available Tools

@@ -6,10 +6,10 @@ Converts the REST API into standard MCP protocol (stdio transport),
 so external MCP clients (Claude Desktop, Cursor, etc.) can connect.
 
 Usage:
-  python mcp_stdio_client.py --url http://192.168.31.150 --key YOUR_API_KEY
+  python mcp_stdio_client.py --url http://YOUR_SERVER_IP --key YOUR_API_KEY
 
 Or set environment variables:
-  export AKH_URL=http://192.168.31.150
+  export AKH_URL=http://YOUR_SERVER_IP
   export AKH_KEY=your_api_key
   python mcp_stdio_client.py
 
@@ -18,7 +18,7 @@ Claude Desktop config (claude_desktop_config.json):
     "mcpServers": {
       "ai-knowledge-hub": {
         "command": "python",
-        "args": ["/path/to/mcp_stdio_client.py", "--url", "http://192.168.31.150", "--key", "YOUR_KEY"],
+        "args": ["/path/to/mcp_stdio_client.py", "--url", "http://YOUR_SERVER_IP", "--key", "YOUR_KEY"],
         "env": {}
       }
     }
@@ -34,7 +34,7 @@ import urllib.parse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="AI Knowledge Hub MCP stdio wrapper")
-    parser.add_argument("--url", default=None, help="Server URL (e.g. http://192.168.31.150)")
+    parser.add_argument("--url", default=None, help="Server URL (e.g. http://YOUR_SERVER_IP)")
     parser.add_argument("--key", default=None, help="API key")
     return parser.parse_args()
 
@@ -45,7 +45,7 @@ def get_config():
     # Try environment variables
     import os
     if not url:
-        url = os.environ.get("AKH_URL", "http://192.168.31.150:8000")
+        url = os.environ.get("AKH_URL", "http://YOUR_SERVER_IP:8000")
     if not key:
         key = os.environ.get("AKH_KEY", "")
     # Remove trailing slash
