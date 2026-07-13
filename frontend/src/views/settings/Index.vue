@@ -212,10 +212,10 @@ async function testEmbedding() {
   if (!embedding.value.api_key) { message.warning("请先填写 API 密钥"); return }
   testing.value = true
   try {
-    const res = await settingsApi.test("embedding", {
+    const res = await api.post("/settings/embedding/test", {
       provider: embedding.value.provider, model: embedding.value.model,
       api_key: embedding.value.api_key, api_url: embedding.value.api_url,
-    })
+    }).then(r => r.data)
     if (res.success) message.success(res.message)
     else message.error(res.message)
     if (res.detail) { showDetail.value = true; testResult.value = res }
