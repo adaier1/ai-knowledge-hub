@@ -111,12 +111,20 @@ async function saveWebdav() {
 async function testWebdav() {
   if (!webdav.value.url) { message.warning("请先填写 WebDAV 地址"); return }
   testingWebdav.value = true
+  const timeout = setTimeout(() => {
+    message.warning("连接超时，请检查地址和网络")
+    testingWebdav.value = false
+  }, 15000)
   try {
     const res = await webdavApi.test({ url: webdav.value.url, username: webdav.value.username, password: webdav.value.password, backup_path: webdav.value.backup_path })
+    clearTimeout(timeout)
     if (res.success) message.success(res.message)
     else message.error(res.message)
-  } catch (e: any) { message.error("请求失败: " + (e.response?.data?.detail || e.message)) }
-  finally { testingWebdav.value = false }
+  } catch (e: any) {
+    clearTimeout(timeout)
+    message.error("请求失败: " + (e.response?.data?.detail || e.message))
+  }
+  finally { clearTimeout(timeout); testingWebdav.value = false }
 }
 
 async function triggerBackup() {
@@ -164,6 +172,7 @@ async function refreshBackupList() {
 
 async function browseDir(path: string) {
   dirBrowser.value.loading = true
+  dirBrowser.value.visible = true
   try {
     const payload: any = { path, url: webdav.value.url }
     if (webdav.value.username) payload.username = webdav.value.username
@@ -171,8 +180,23 @@ async function browseDir(path: string) {
     const res = await webdavApi.browse(payload)
     dirBrowser.value.dirs = res.directories || []
     dirBrowser.value.currentPath = path
-  } catch (e: any) { message.error("获取目录失败: " + (e.response?.data?.detail || e.message)); dirBrowser.value.dirs = [] }
+  } catch (e: any) {
+    message.error("获取目录失败: " + (e.response?.data?.detail || e.message))
+    dirBrowser.value.dirs = []
+  }
   finally { dirBrowser.value.loading = false }
+}
+
+function selectDir(name: string) {
+  const p = dirBrowser.value.currentPath.replace(/\/$/, "") + "/" + name
+  webdav.value.backup_path = p
+  dirBrowser.value.visible = false
+}
+
+function goUpDir() {
+  const p = dirBrowser.value.currentPath.replace(/\/$/, "")
+  const parent = p.substring(0, p.lastIndexOf("/")) || "/"
+  browseDir(parent)
 }
 
 function isServerRoot(path: string) { return !path || path === '/' }
@@ -412,8 +436,35 @@ async function importFromWebdav(name: string) {
           <label style="display:inline-flex;align-items:center;gap:6px;padding:0 16px;height:32px;border-radius:8px;border:1px solid var(--apple-blue);color:var(--apple-blue);font-size:13px;cursor:pointer">
             <Upload :size="14" stroke-width="1.5" />
             {{ importing ? '导入中...' : '从本地上传导入' }}
-            <input type="file" accept=".json" style="display:none" :disabled="importing" @change="handleLocalImport" />
+            <input type="file" accept=".json,.zip" style="display:none" :disabled="importing" @change="handleLocalImport" />
           </label>
+        </div>
+      </div>
+
+      <!-- Directory Browser Modal -->
+      <div v-if="dirBrowser.visible" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3)" @click.self="dirBrowser.visible = false">
+        <div style="background:#fff;border-radius:12px;padding:20px;width:400px;max-width:90vw;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.2)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-weight:600;font-size:15px">选择备份目录</span>
+            <button style="padding:4px;background:none;border:none;font-size:18px;cursor:pointer;color:#999" @click="dirBrowser.visible = false">&times;</button>
+          </div>
+          <div style="font-size:12px;color:var(--apple-text-secondary);margin-bottom:8px;word-break:break-all">
+            当前路径: {{ dirBrowser.currentPath }}
+          </div>
+          <div v-if="dirBrowser.loading" style="text-align:center;padding:30px;color:#999">加载中...</div>
+          <div v-else style="flex:1;overflow-y:auto">
+            <div v-if="dirBrowser.currentPath !== '/'" style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px" @click="goUpDir()">
+              <FolderOpen :size="14" stroke-width="1.5" /> ..
+            </div>
+            <div v-for="d in dirBrowser.dirs" :key="d.name" style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;transition:background 0.15s" :style="{background: (webdav.backup_path.endsWith(d.name) || webdav.backup_path === dirBrowser.currentPath + '/' + d.name) ? '#f0f0f0' : 'transparent'}" @click="selectDir(d.name)" @mouseenter="$event.target.style.background='#f5f5f5'" @mouseleave="$event.target.style.background=''">
+              <Folder :size="14" stroke-width="1.5" /> {{ d.name }}
+            </div>
+            <div v-if="!dirBrowser.loading && dirBrowser.dirs.length === 0" style="text-align:center;padding:20px;color:var(--apple-text-tertiary);font-size:12px">暂无子目录</div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #eee;padding-top:12px">
+            <button style="padding:0 14px;height:32px;border-radius:8px;border:1px solid #ddd;background:transparent;font-size:13px;cursor:pointer" @click="dirBrowser.visible = false">取消</button>
+            <button style="padding:0 14px;height:32px;border-radius:8px;border:none;background:#007aff;color:#fff;font-size:13px;cursor:pointer" @click="dirBrowser.visible = false">确定</button>
+          </div>
         </div>
       </div>
 
