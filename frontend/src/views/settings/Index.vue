@@ -112,9 +112,9 @@ async function testWebdav() {
   if (!webdav.value.url) { message.warning("请先填写 WebDAV 地址"); return }
   testingWebdav.value = true
   const timeout = setTimeout(() => {
-    message.warning("连接超时，请检查地址和网络")
+    message.warning("连接超时（30秒），请检查地址和网络")
     testingWebdav.value = false
-  }, 15000)
+  }, 30000)
   try {
     const res = await webdavApi.test({ url: webdav.value.url, username: webdav.value.username, password: webdav.value.password, backup_path: webdav.value.backup_path })
     clearTimeout(timeout)
@@ -306,12 +306,7 @@ async function importFromWebdav(name: string) {
         <div style="display:flex;gap:12px;margin-bottom:14px">
           <div style="flex:1">
             <label style="display:block;font-size:13px;color:var(--apple-text-secondary);margin-bottom:4px">WebDAV 地址</label>
-            <div style="position:relative">
-              <input v-model="webdav.url" class="apple-input" placeholder="https://example.com/dav/" style="width:100%;padding-right:36px" />
-              <button style="position:absolute;right:4px;top:50%;transform:translateY(-50%);padding:4px;background:transparent;border:none;color:var(--apple-text-tertiary);cursor:pointer;display:flex" @click="browseDir('/')" title="浏览目录">
-                <FolderOpen :size="16" stroke-width="1.5" />
-              </button>
-            </div>
+            <input v-model="webdav.url" class="apple-input" placeholder="https://example.com/dav/" style="width:100%" />
           </div>
           <div style="flex:1">
             <label style="display:block;font-size:13px;color:var(--apple-text-secondary);margin-bottom:4px">用户名</label>
@@ -462,7 +457,7 @@ async function importFromWebdav(name: string) {
             <div v-if="!dirBrowser.loading && dirBrowser.dirs.length === 0" style="text-align:center;padding:20px;color:var(--apple-text-tertiary);font-size:12px">暂无子目录</div>
           </div>
           <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #eee;padding-top:12px">
-            <button style="padding:0 14px;height:32px;border-radius:8px;border:1px solid #ddd;background:transparent;font-size:13px;cursor:pointer" @click="dirBrowser.visible = false">取消</button>
+            <button style="padding:0 14px;height:32px;border-radius:8px;border:none;background:#ff3b30;color:#fff;font-size:13px;cursor:pointer" @click="dirBrowser.visible = false">取消</button>
             <button style="padding:0 14px;height:32px;border-radius:8px;border:none;background:#007aff;color:#fff;font-size:13px;cursor:pointer" @click="dirBrowser.visible = false">确定</button>
           </div>
         </div>
