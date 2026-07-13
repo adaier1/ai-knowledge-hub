@@ -61,6 +61,7 @@ export const databaseApi = {
 export const settingsApi = {
   get: (c: string) => api.get('/settings/' + c).then(r => r.data),
   update: (c: string, k: string, v: any) => api.put('/settings/' + c + '/' + k, { value: v }).then(r => r.data),
+  test: (c: string, d: any) => api.post('/settings/' + c + '/test', d).then(r => r.data),
 }
 
 export const mcpApi = {
