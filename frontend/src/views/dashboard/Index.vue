@@ -133,6 +133,46 @@ const sparklineOptions = computed(() =>
 
 const theColors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16']
 
+const wordCloudOptions = computed(() => ({
+  tooltip: { show: false },
+  series: [{
+    type: 'wordCloud',
+    data: (topKnowledge.value || []).map(function(k) { return { name: k.title || k.name || '', value: k.count || 1 }; }),
+    shape: 'circle',
+    sizeRange: [14, 42],
+    rotationRange: [0, 0],
+    textStyle: {
+      fontFamily: '-apple-system, "PingFang SC", "Noto Sans SC", sans-serif',
+      color: function() { return theColors[Math.floor(Math.random() * theColors.length)]; },
+    },
+    left: 'center',
+    top: 'center',
+    width: '90%',
+    height: '90%',
+  }],
+}))
+
+const categoryChartOptions = computed(function() {
+  var s = stats.value || {};
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c}' },
+    series: [{
+      type: 'pie',
+      radius: ['35%', '60%'],
+      center: ['50%', '50%'],
+      data: [
+        { name: '知识条目', value: s.knowledge_count || 0 },
+        { name: '向量嵌入', value: s.embedding_count || 0 },
+        { name: '关系连接', value: s.graph_relations || 0 },
+        { name: '集合', value: s.collection_count || 0 },
+      ],
+      label: { show: true, fontSize: 12, color: '#475569' },
+      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+      emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.15)' } },
+    }],
+  };
+})
+
 async function loadData() {
   loading.value = true
   try {

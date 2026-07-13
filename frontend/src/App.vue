@@ -62,7 +62,7 @@ function navigate(key: string) { router.push(key) }
                 </linearGradient>
               </defs>
             </svg>
-            <span class="logo-text">AI 鐭ヨ瘑涓績</span>
+            <span class="logo-text">AI 知识中心</span>
           </div>
           <nav class="sidebar-nav">
             <a v-for="item in menuItems" :key="item.key"

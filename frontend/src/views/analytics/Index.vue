@@ -22,6 +22,23 @@ onMounted(async () => {
   try { topKnowledge.value = await analyticsApi.topKnowledge(10) } catch {}
 })
 
+const logs = ref<any[]>([])
+const logsLoading = ref(false)
+
+async function loadLogs() {
+  logsLoading.value = true
+  try {
+    const res = await fetch('/api/analytics/logs?lines=200')
+    const data = await res.json()
+    logs.value = data.logs || []
+  } catch { logs.value = [] }
+  finally { logsLoading.value = false }
+}
+
+onMounted(() => {
+  setTimeout(loadLogs, 500)
+})
+
 const trendColumns = [
   { title: '日期', key: 'date', width: 100 },
   { title: '搜索次数', key: 'count', width: 80 },
@@ -64,5 +81,20 @@ const trendColumns = [
         </NCard>
       </div>
     </div>
+    <!-- Log Viewer -->
+  <div style="margin-top:20px">
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      <span>📋</span> 系统日志
+      <button style="margin-left:auto;padding:4px 12px;height:28px;border-radius:6px;border:1px solid #d9d9d9;background:#fff;font-size:12px;cursor:pointer;color:#333" @click="loadLogs">{{ logsLoading ? '加载中...' : '刷新' }}</button>
+    </h2>
+    <div v-if="logs.length === 0 && !logsLoading" style="text-align:center;padding:32px;color:#999;font-size:13px">暂无日志</div>
+    <div v-for="log in logs" :key="log.path" style="margin-bottom:12px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
+      <div style="padding:8px 12px;background:#f8fafc;font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between">
+        <span>📄 {{ log.file }}</span>
+        <span style="font-weight:400;color:#94a3b8;font-size:11px">{{ log.path }}</span>
+      </div>
+      <pre style="margin:0;padding:12px;font-size:11px;line-height:1.6;max-height:400px;overflow:auto;background:#1e293b;color:#e2e8f0;font-family:SF Mono,Menlo,Monaco,Courier New,monospace;border-radius:0">{{ log.lines }}</pre>
+    </div>
   </div>
+</div>
 </template>
