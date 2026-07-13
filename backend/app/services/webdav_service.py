@@ -482,7 +482,10 @@ def _cleanup_old_backups(client, backup_path, retention_days=30):
         for item in items:
             if not isinstance(item, dict):
                 continue
-            name = item.get("name", "")
+            raw_name = item.get("name", "")
+            name = os.path.basename(raw_name.rstrip("/"))
+            if not name:
+                name = raw_name
             if not (name.startswith(BACKUP_FILE_PREFIX) and name.endswith(BACKUP_FILE_SUFFIX)):
                 continue
             modified = item.get("last_modified", None)
@@ -520,16 +523,21 @@ def list_backups(url, username="", password="", backup_path="akh-backups"):
         for item in items:
             if not isinstance(item, dict):
                 continue
-            name = item.get("name", "")
-            if not (name.startswith(BACKUP_FILE_PREFIX) and name.endswith(BACKUP_FILE_SUFFIX)):
+            raw_name = item.get("name", "")
+            base_name = os.path.basename(raw_name.rstrip("/"))
+            if not base_name:
+                base_name = raw_name
+            if not (base_name.startswith(BACKUP_FILE_PREFIX) and base_name.endswith(BACKUP_FILE_SUFFIX)):
                 continue
             href = item.get("href", "")
             size = item.get("content_length", 0) or 0
             modified = item.get("last_modified", None) or ""
             if isinstance(modified, datetime.datetime):
                 modified = modified.isoformat()
+            clean_bp = backup_path.strip("/")
+            remote_path = "/" + clean_bp + "/" + base_name if clean_bp else "/" + base_name
             files.append({
-                "name": name, "href": href, "size": size,
+                "name": base_name, "href": remote_path, "size": size,
                 "size_display": _format_size(size), "modified": str(modified),
             })
         files.sort(key=lambda f: f.get("modified", ""), reverse=True)

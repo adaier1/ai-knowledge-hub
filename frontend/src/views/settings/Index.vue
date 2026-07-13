@@ -424,7 +424,7 @@ async function importFromWebdav(name: string) {
             </template>
           </div>
         </div>
-        <div v-else-if="!backupList.length" style="margin-top:12px;padding:8px 0;text-align:center;color:var(--apple-text-tertiary);font-size:13px">暂无备份文件，请鍏堥厤置 WebDAV 并执行备份</div>
+        <div v-else-if="!backupList.length" style="margin-top:12px;padding:8px 0;text-align:center;color:var(--apple-text-tertiary);font-size:13px">暂无备份文件，请先配置 WebDAV 并执行备份</div>
 
         <!-- Local import -->
         <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
