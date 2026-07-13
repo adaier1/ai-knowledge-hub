@@ -3,6 +3,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text, or_
 from app.models.models import Knowledge, Chunk, Embedding, Tag, KnowledgeTag, Collection, CollectionItem, Entity, Relation
+from app.services.embedding_service import embedding_service
 
 CHUNK_SIZE = 500
 
@@ -53,6 +54,11 @@ def create_knowledge(db: Session, data) -> Knowledge:
     db.commit()
     db.refresh(kn)
     _sync_fts(db, kn.id)
+    # Auto-embed new knowledge
+    try:
+        embedding_service.build_embeddings_for_knowledge(db, kn.id, getattr(embedding_service, "_active_version", "v1"))
+    except Exception:
+        pass
     return kn
 
 def update_knowledge(db: Session, knowledge_id: int, data) -> Optional[Knowledge]:
