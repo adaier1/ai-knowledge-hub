@@ -7,6 +7,11 @@ from webdav4.client import Client, HTTPError
 from app.models.models import Knowledge, Chunk, Embedding, Tag, KnowledgeTag, Entity, Relation, Setting, SearchLog, Statistic
 
 logger = logging.getLogger("webdav")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(name)s] %(levelname)s: %(message)s"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
 
 T = TypeVar("T")
 
@@ -383,12 +388,18 @@ def _extract_backup_archive(zip_path, extract_dir):
 def test_connection(url, username="", password=""):
     try:
         client = create_webdav_client(url, username, password)
-        with_retry(lambda: client.exists("/"))
+        # Try OPTIONS first (works on all HTTP servers)
+        try:
+            resp = client.options("/")
+            logger.debug("OPTIONS response: %s", resp)
+        except Exception as opt_e:
+            logger.debug("OPTIONS failed, trying exists: %s", str(opt_e))
+            with_retry(lambda: client.exists("/"))
         return {"success": True, "message": "连接成功"}
     except HTTPError as e:
         msg = parse_webdav_error(e.status_code)
         logger.error("WebDAV test failed: status=%s, url=%s", e.status_code, url)
-        return {"success": False, "message": "连接失败: " + msg}
+        return {"success": False, "message": "连接失败: " + msg + " (HTTP " + str(e.status_code) + ")"}
     except Exception as e:
         logger.error("WebDAV test exception: %s", str(e), exc_info=True)
         return {"success": False, "message": "连接失败: " + str(e)[:200]}
