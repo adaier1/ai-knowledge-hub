@@ -152,6 +152,34 @@ def api_browse_webdav(data: dict, db: Session = Depends(get_db)):
     return {"directories": dirs, "current_path": path}
 
 
+@router.post("/backup-data")
+def api_backup_data(db: Session = Depends(get_db)):
+    cfg = get_config(db)
+    if not cfg.get("url"):
+        raise HTTPException(status_code=400, detail="请先配置 WebDAV")
+    from app.services.webdav_service import backup_to_webdav
+    result = backup_to_webdav(
+        db, cfg["url"], cfg.get("username", ""),
+        cfg.get("password", ""), cfg.get("backup_path", "akh-backups"),
+        retention_days=cfg.get("retention_days", 30),
+    )
+    return result
+
+
+@router.post("/restore-data")
+def api_restore_data(data: dict, db: Session = Depends(get_db)):
+    cfg = get_config(db)
+    if not cfg.get("url"):
+        raise HTTPException(status_code=400, detail="请先配置 WebDAV")
+    file_href = data.get("href", "")
+    if not file_href:
+        raise HTTPException(status_code=400, detail="请指定备份文件")
+    from app.services.webdav_service import import_from_webdav
+    result = import_from_webdav(db, cfg["url"], cfg.get("username", ""),
+                                 cfg.get("password", ""), file_href)
+    return result
+
+
 _scheduler_thread = None
 _scheduler_stop = False
 

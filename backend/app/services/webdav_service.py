@@ -437,7 +437,7 @@ def backup_to_webdav(db, url, username="", password="", backup_path="akh-backups
         logger.info("Starting backup to %s/%s", url, remote_path)
         try:
             with_retry(lambda: client.mkdir(backup_path))
-        except HTTPError:
+        except Exception:
             pass
         temp_dir = tempfile.mkdtemp(prefix="akh_backup_")
         zip_path = _create_backup_archive(db, temp_dir)
