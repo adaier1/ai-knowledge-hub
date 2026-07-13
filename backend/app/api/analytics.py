@@ -36,13 +36,35 @@ def api_get_logs(lines: int = Query(200, ge=10, le=1000)):
             for f in glob.glob(pattern, recursive=True):
                 if os.path.isfile(f):
                     log_files.append(os.path.abspath(f))
-    log_data = []
-    for lf in log_files[:3]:
+    log_files = list(set(log_files))[:3]
+    all_lines = []
+    for lf in log_files:
         try:
             with open(lf, "r", errors="replace") as fh:
-                all_lines = fh.readlines()
-            tail = all_lines[-lines:]
-            log_data.append({"file": os.path.basename(lf), "path": lf, "lines": "".join(tail[-lines:])})
-        except Exception as e:
-            log_data.append({"file": os.path.basename(lf), "path": lf, "lines": "Error: " + str(e)[:200]})
-    return {"logs": log_data}
+                all_lines.extend(fh.readlines())
+        except Exception:
+            pass
+    all_lines = all_lines[-lines:]
+    entries = []
+    import re as _re
+    for line in all_lines:
+        line = line.rstrip("\n\r ")
+        if not line:
+            continue
+        entry = {"time": "", "level": "INFO", "message": line, "raw": line}
+        m = _re.match(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[,\.]?\d*)\s+", line)
+        if m:
+            entry["time"] = m.group(1)
+            rest = line[m.end():]
+        else:
+            rest = line
+        rest = rest.strip()
+        for lvl in ["ERROR", "WARNING", "WARN", "INFO", "DEBUG", "CRITICAL"]:
+            if rest.startswith(lvl) or rest.startswith(lvl.lower()):
+                entry["level"] = lvl
+                rest = rest[len(lvl):].strip(" :")
+                break
+        entry["message"] = rest
+        entries.append(entry)
+    entries.reverse()
+    return {"logs": entries}

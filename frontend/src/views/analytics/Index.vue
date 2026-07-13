@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { NCard, NDataTable, NGrid, NGi, NNumberAnimation } from 'naive-ui'
 import { analyticsApi } from '../../api'
 
@@ -24,18 +24,24 @@ onMounted(async () => {
 
 const logs = ref<any[]>([])
 const logsLoading = ref(false)
+const logLevel = ref('')
+
+const filteredLogs = computed(() => {
+  if (!logLevel.value) return logs.value
+  return logs.value.filter(function(e) { return e.level === logLevel.value; })
+})
 
 async function loadLogs() {
   logsLoading.value = true
   try {
-    const res = await fetch('/api/analytics/logs?lines=200')
+    const res = await fetch('/api/analytics/logs?lines=500')
     const data = await res.json()
     logs.value = data.logs || []
   } catch { logs.value = [] }
   finally { logsLoading.value = false }
 }
 
-onMounted(() => {
+onMounted(function() {
   setTimeout(loadLogs, 500)
 })
 
@@ -83,18 +89,49 @@ const trendColumns = [
     </div>
     <!-- Log Viewer -->
   <div style="margin-top:20px">
-    <h2 style="font-size:18px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-      <span>📋</span> 系统日志
-      <button style="margin-left:auto;padding:4px 12px;height:28px;border-radius:6px;border:1px solid #d9d9d9;background:#fff;font-size:12px;cursor:pointer;color:#333" @click="loadLogs">{{ logsLoading ? '加载中...' : '刷新' }}</button>
-    </h2>
-    <div v-if="logs.length === 0 && !logsLoading" style="text-align:center;padding:32px;color:#999;font-size:13px">暂无日志</div>
-    <div v-for="log in logs" :key="log.path" style="margin-bottom:12px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
-      <div style="padding:8px 12px;background:#f8fafc;font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between">
-        <span>📄 {{ log.file }}</span>
-        <span style="font-weight:400;color:#94a3b8;font-size:11px">{{ log.path }}</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h2 style="font-size:18px;font-weight:700">📋 系统日志</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select v-model="logLevel" style="padding:3px 8px;height:28px;border-radius:6px;border:1px solid #d9d9d9;font-size:12px;background:#fff;outline:none">
+          <option value="">全部级别</option>
+          <option value="ERROR">ERROR</option>
+          <option value="WARNING">WARNING</option>
+          <option value="INFO">INFO</option>
+          <option value="DEBUG">DEBUG</option>
+        </select>
+        <button style="padding:4px 12px;height:28px;border-radius:6px;border:1px solid #d9d9d9;background:#fff;font-size:12px;cursor:pointer;color:#333" @click="loadLogs">{{ logsLoading ? '加载中...' : '刷新' }}</button>
       </div>
-      <pre style="margin:0;padding:12px;font-size:11px;line-height:1.6;max-height:400px;overflow:auto;background:#1e293b;color:#e2e8f0;font-family:SF Mono,Menlo,Monaco,Courier New,monospace;border-radius:0">{{ log.lines }}</pre>
     </div>
+    <div v-if="filteredLogs.length === 0 && !logsLoading" style="text-align:center;padding:40px;color:#999;font-size:13px">暂无日志</div>
+    <div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:1px solid #e5e7eb">
+            <th style="padding:8px 10px;text-align:left;font-weight:600;color:#64748b;width:180px">时间</th>
+            <th style="padding:8px 10px;text-align:left;font-weight:600;color:#64748b;width:80px">级别</th>
+            <th style="padding:8px 10px;text-align:left;font-weight:600;color:#64748b">事件</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(entry, idx) in filteredLogs.slice(0, 200)" :key="idx"
+            style="border-bottom:1px solid #f1f5f9;transition:background 0.1s"
+            :style="{background: entry.level === 'ERROR' ? '#fef2f2' : entry.level === 'WARNING' ? '#fffbeb' : entry.level === 'DEBUG' ? '#f8fafc' : ''}"
+            @mouseenter="$event.currentTarget.style.background = entry.level === 'ERROR' ? '#fee2e2' : '#f8fafc'"
+            @mouseleave="$event.currentTarget.style.background = entry.level === 'ERROR' ? '#fef2f2' : entry.level === 'WARNING' ? '#fffbeb' : ''">
+            <td style="padding:6px 10px;font-family:SF Mono,Menlo,monospace;color:#64748b;white-space:nowrap">{{ entry.time || '-' }}</td>
+            <td style="padding:6px 10px">
+              <span :style="{
+                display:'inline-block',padding:'1px 8px',borderRadius:'4px',fontSize:'11px',fontWeight:600,
+                color: entry.level === 'ERROR' ? '#dc2626' : entry.level === 'WARNING' ? '#d97706' : entry.level === 'INFO' ? '#2563eb' : '#78716c',
+                background: entry.level === 'ERROR' ? '#fef2f2' : entry.level === 'WARNING' ? '#fffbeb' : entry.level === 'INFO' ? '#eff6ff' : '#f5f5f4'
+              }">{{ entry.level }}</span>
+            </td>
+            <td style="padding:6px 10px;color:#1e293b;line-height:1.5;word-break:break-all">{{ entry.message || entry.raw }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-if="filteredLogs.length > 200" style="text-align:center;padding:12px;color:#999;font-size:12px">显示前 200 条，共 {{ filteredLogs.length }} 条</div>
   </div>
 </div>
 </template>
