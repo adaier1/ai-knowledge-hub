@@ -20,7 +20,7 @@ const testResult = ref<any>(null)
 const importing = ref(false)
 const dirBrowser = ref({ visible: false, loading: false, dirs: [], currentPath: '' })
 const backupEnabled = ref(false)
-const webdav = ref({ url: "", username: "", password: "", backup_path: "akh-backups", schedule_time: "", schedule_frequency: "daily", schedule_day: 1 })
+const webdav = ref({ url: "", username: "", password: "", backup_path: "akh-backups", schedule_time: "", schedule_frequency: "daily", schedule_day: 1, retention_days: 30 })
 const backupList = ref<any[]>([])
 
 // Password toggle using direct DOM manipulation
@@ -102,7 +102,7 @@ async function saveWebdav() {
       url: webdav.value.url, username: webdav.value.username, password: webdav.value.password,
       backup_path: webdav.value.backup_path, schedule_time: webdav.value.schedule_time,
       schedule_frequency: webdav.value.schedule_frequency, schedule_day: webdav.value.schedule_day,
-      schedule_enabled: backupEnabled.value,
+      schedule_enabled: backupEnabled.value, retention_days: webdav.value.retention_days,
     })
     message.success("配置已保存")
   } catch { message.error("保存失败") }
@@ -308,7 +308,12 @@ async function importFromWebdav(name: string) {
             </div>
           </div>
           <div style="flex:1">
-            <label style="display:block;font-size:13px;color:var(--apple-text-secondary);margin-bottom:4px">备份目录</label>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label style="font-size:13px;color:var(--apple-text-secondary)">备份目录</label>
+              <button style="padding:0 8px;height:24px;border-radius:6px;border:1px solid var(--apple-border);background:transparent;color:var(--apple-blue);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:3px" @click="browseDir(webdav.backup_path || '/')">
+                <FolderOpen :size="12" stroke-width="1.5" /> 浏览WebDAV目录
+              </button>
+            </div>
             <input v-model="webdav.backup_path" class="apple-input" placeholder="/backups" style="width:100%" />
           </div>
         </div>
@@ -353,6 +358,16 @@ async function importFromWebdav(name: string) {
               <span style="font-size:13px;color:var(--apple-text-secondary)">自动备份</span>
             </div>
           </template>
+        </div>
+
+        <!-- Retention days -->
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:13px;color:var(--apple-text-secondary);margin-bottom:6px">备份保留期限</label>
+          <div style="display:flex;gap:6px">
+            <button :style="{'flex':1,'padding':'0 12px','height':'32px','border-radius':'8px','border':'1px solid ' + (webdav.retention_days === 7 ? '#007aff' : '#e8e8ed'),'background': webdav.retention_days === 7 ? '#007aff' : 'transparent','color': webdav.retention_days === 7 ? '#fff' : '#1d1d1f','font-size':'13px','cursor':'pointer'}" @click="webdav.retention_days = 7">7 天</button>
+            <button :style="{'flex':1,'padding':'0 12px','height':'32px','border-radius':'8px','border':'1px solid ' + (webdav.retention_days === 30 ? '#007aff' : '#e8e8ed'),'background': webdav.retention_days === 30 ? '#007aff' : 'transparent','color': webdav.retention_days === 30 ? '#fff' : '#1d1d1f','font-size':'13px','cursor':'pointer'}" @click="webdav.retention_days = 30">30 天</button>
+            <button :style="{'flex':1,'padding':'0 12px','height':'32px','border-radius':'8px','border':'1px solid ' + (webdav.retention_days === 0 ? '#007aff' : '#e8e8ed'),'background': webdav.retention_days === 0 ? '#007aff' : 'transparent','color': webdav.retention_days === 0 ? '#fff' : '#1d1d1f','font-size':'13px','cursor':'pointer'}" @click="webdav.retention_days = 0">永久保存</button>
+          </div>
         </div>
 
         <!-- Action buttons -->
