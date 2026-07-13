@@ -530,7 +530,7 @@ async function importFromWebdav(name: string) {
               <span style="color:var(--apple-text-secondary)">{{ v.count }} 条</span>
               <span style="color:var(--apple-text-tertiary);font-size:12px">{{ v.latest ? new Date(v.latest).toLocaleString() : '' }}</span>
               <div style="margin-left:auto;display:flex;gap:6px">
-                <button v-if="v.name !== activeVersion" style="padding:0 10px;height:26px;font-size:11px;border-radius:6px;border:1px solid var(--apple-border);background:transparent;cursor:pointer" @click="switchVersion(v.name)">切换</button>
+                <button v-if="v.name !== activeVersion" style="padding:0 10px;height:26px;font-size:11px;border-radius:6px;border:none;background:var(--apple-blue);color:#fff;cursor:pointer" @click="switchVersion(v.name)">切换</button>
                 <button v-if="v.name !== 'v1'" style="padding:0 10px;height:26px;font-size:11px;border-radius:6px;border:1px solid #ff3b30;color:#ff3b30;background:transparent;cursor:pointer" @click="deleteVersion(v.name)">删除</button>
               </div>
             </div>
