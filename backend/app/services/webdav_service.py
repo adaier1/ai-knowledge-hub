@@ -413,11 +413,13 @@ def list_directories(url, username="", password="", path=""):
         items = with_retry(lambda: client.ls(bp))
         dirs = []
         for item in items:
-            if isinstance(item, dict) and item.get("is_collection"):
-                name = item.get("name", "")
-                href = item.get("href", "")
-                if name:
-                    dirs.append({"name": name, "href": href})
+            if isinstance(item, dict):
+                typ = item.get("type", "")
+                if typ == "directory" or item.get("is_collection"):
+                    name = item.get("display_name") or item.get("name", "")
+                    href = item.get("href", "")
+                    if name:
+                        dirs.append({"name": name, "href": href})
         dirs.sort(key=lambda d: d["name"].lower())
         return dirs
     except Exception as e:
